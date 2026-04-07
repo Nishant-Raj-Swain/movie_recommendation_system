@@ -4,17 +4,22 @@ import requests
 import time
 import warnings
 import os
-import gdown   # ✅ added
+import gdown
 
-warnings.filterwarnings("ignore")  # ✅ hide warnings
+warnings.filterwarnings("ignore")
+
+# ---------------- DOWNLOAD similarity.pkl ---------------- #
+
+SIMILARITY_URL = "https://drive.google.com/uc?id=YOUR_FILE_ID"
+
+# ✅ download if not exists OR corrupted
+if not os.path.exists("similarity.pkl") or os.path.getsize("similarity.pkl") < 100000:
+    if os.path.exists("similarity.pkl"):
+        os.remove("similarity.pkl")
+    gdown.download(SIMILARITY_URL, "similarity.pkl", quiet=False, fuzzy=True)
 
 
-# ✅ ONLY similarity.pkl from Google Drive
-SIMILARITY_URL = "https://drive.google.com/file/d/14_al_FKw5r8nnn98-0_3GPdWw3uZKGIr/view?usp=sharing"
-
-if not os.path.exists("similarity.pkl"):
-    gdown.download(SIMILARITY_URL, "similarity.pkl", quiet=False)
-
+# ---------------- FETCH POSTER ---------------- #
 
 def fetch_poster(movie_id):
     url = "https://api.themoviedb.org/3/movie/{}?api_key=91e50bd6f2b317f3a5827f9cd407311d&language=en-US".format(movie_id)
@@ -40,6 +45,8 @@ def fetch_poster(movie_id):
     return "https://via.placeholder.com/500x750?text=Not+Available"
 
 
+# ---------------- RECOMMEND ---------------- #
+
 def recommend(movie):
     index = movies[movies['title'] == movie].index[0]
     distances = sorted(list(enumerate(similarity[index])), reverse=True, key=lambda x: x[1])
@@ -57,12 +64,11 @@ def recommend(movie):
     return recommended_movie_names, recommended_movie_posters
 
 
+# ---------------- UI ---------------- #
+
 st.header('🎬 Movie Recommender System')
 
-# ❗ movie_list.pkl stays LOCAL (no change)
 movies = pickle.load(open('movie_list.pkl','rb'))
-
-# ✅ similarity.pkl downloaded from Drive
 similarity = pickle.load(open('similarity.pkl','rb'))
 
 movie_list = movies['title'].values
