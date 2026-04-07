@@ -3,8 +3,18 @@ import streamlit as st
 import requests
 import time
 import warnings
+import os
+import gdown   # ✅ added
 
 warnings.filterwarnings("ignore")  # ✅ hide warnings
+
+
+# ✅ ONLY similarity.pkl from Google Drive
+SIMILARITY_URL = "https://drive.google.com/file/d/14_al_FKw5r8nnn98-0_3GPdWw3uZKGIr/view?usp=sharing"
+
+if not os.path.exists("similarity.pkl"):
+    gdown.download(SIMILARITY_URL, "similarity.pkl", quiet=False)
+
 
 def fetch_poster(movie_id):
     url = "https://api.themoviedb.org/3/movie/{}?api_key=91e50bd6f2b317f3a5827f9cd407311d&language=en-US".format(movie_id)
@@ -38,7 +48,7 @@ def recommend(movie):
     recommended_movie_posters = []
     
     for i in distances[1:6]:
-        time.sleep(0.3)  # ✅ prevent API blocking
+        time.sleep(0.3)
         movie_id = movies.iloc[i[0]].movie_id
         
         recommended_movie_posters.append(fetch_poster(movie_id))
@@ -49,8 +59,10 @@ def recommend(movie):
 
 st.header('🎬 Movie Recommender System')
 
-# ❗ PATH SAME
+# ❗ movie_list.pkl stays LOCAL (no change)
 movies = pickle.load(open('movie_list.pkl','rb'))
+
+# ✅ similarity.pkl downloaded from Drive
 similarity = pickle.load(open('similarity.pkl','rb'))
 
 movie_list = movies['title'].values
