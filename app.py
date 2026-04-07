@@ -4,19 +4,34 @@ import requests
 import time
 import warnings
 import os
-import gdown
 
 warnings.filterwarnings("ignore")
 
-# ---------------- DOWNLOAD similarity.pkl ---------------- #
+# ---------------- DOWNLOAD similarity.pkl (FINAL FIX) ---------------- #
 
-SIMILARITY_URL = "https://drive.google.com/uc?id=YOUR_FILE_ID"
+FILE_ID = "YOUR_FILE_ID"
 
-# ✅ download if not exists OR corrupted
-if not os.path.exists("similarity.pkl") or os.path.getsize("similarity.pkl") < 100000:
-    if os.path.exists("similarity.pkl"):
-        os.remove("similarity.pkl")
-    gdown.download(SIMILARITY_URL, "similarity.pkl", quiet=False, fuzzy=True)
+def download_file_from_google_drive(file_id, destination):
+    URL = "https://drive.google.com/uc?export=download"
+    session = requests.Session()
+
+    response = session.get(URL, params={'id': file_id}, stream=True)
+
+    # handle large file confirmation
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            params = {'id': file_id, 'confirm': value}
+            response = session.get(URL, params=params, stream=True)
+            break
+
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(32768):
+            if chunk:
+                f.write(chunk)
+
+# ✅ download only if not exists
+if not os.path.exists("similarity.pkl"):
+    download_file_from_google_drive(FILE_ID, "similarity.pkl")
 
 
 # ---------------- FETCH POSTER ---------------- #
