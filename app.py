@@ -50,8 +50,8 @@ def recommend(movie):
 st.header('🎬 Movie Recommender System')
 
 # ❗ PATH SAME
-movies = pickle.load(open('D:/New Volume/SANKET/streamlit/movie_list.pkl','rb'))
-similarity = pickle.load(open('D:/New Volume/SANKET/streamlit/similarity.pkl','rb'))
+movies = pickle.load(open('movie_list.pkl','rb'))
+similarity = pickle.load(open('similarity.pkl','rb'))
 
 movie_list = movies['title'].values
 
